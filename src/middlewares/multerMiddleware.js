@@ -38,6 +38,5 @@ export const upload = multer({
   storage: storage,
   // Apply the file filter to allow only images.
   fileFilter: fileFilter,
-  // Uncomment the following line to enforce a file size limit of 5MB.
-  // limits: { fileSize: 5 * 1024 * 1024 }
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
