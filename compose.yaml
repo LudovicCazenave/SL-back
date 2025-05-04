@@ -1,0 +1,34 @@
+
+services:
+  seniorlove-app: # Build the service from the current directory using the Dockerfile.
+    build: .
+    ports:
+      - "3000:3000" # Map port 3000 on the host to port 3000 in the container.
+    depends_on: # Define dependencies on the seniorlove-db service.
+      seniorlove-db: 
+          condition: service_healthy # Ensure the service is only started when the database is healthy.
+          restart: true # Automatically restart the service if it fails.
+    develop:  # Development settings.
+      watch: # Watch for changes in the specified paths and take actions.
+        - action: sync # Sync changes from the local src directory to the container's /app/src directory.
+          path: ./src
+          target: /app/src
+        - action: rebuild  # Rebuild the service when package.json changes.
+          path: package.json
+  seniorlove-db:
+    image: "postgres"  # Use the official Postgres image.
+    environment: # Set environment variables for the database user, password, and database name.
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+    healthcheck: # Configure health checks for the database service.
+        test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"] # Check if the database is ready using the pg_isready command.
+        interval: 10s # Interval between each health check (10 seconds).
+        retries: 5  # Number of retries before considering the service as unhealthy.
+        start_period: 30s # Time to wait before starting the first health check (30 seconds).
+        timeout: 10s # Timeout for each individual health check (10 seconds).
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d # Map the local ./data directory to the container's initdb directory.
+      - pgdata:/var/lib/postgresql/data # Define named volumes to persist data.
+volumes:
+  pgdata:

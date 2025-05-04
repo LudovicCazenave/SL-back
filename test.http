@@ -1,0 +1,115 @@
+# Route for user sign in
+POST http://localhost:3000/api/signin
+Content-Type: application/json
+
+{
+    "email":"claude65@example.com",
+    "password":"Cl@ude1958!"
+}
+
+
+
+###
+# Route to destroy JWT
+POST http://localhost:3000/api/logout
+Cookie:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MDUyNDk1NiwiZXhwIjoxNzQwNTM1NzU2fQ.XMNeHM9iKBUdBO-uDDF_2mFQCZOE1xIxp_4sYPjZbmo
+
+###
+# Route to filter events
+GET http://localhost:3000/api/filter-event
+###
+
+GET http://localhost:3000/api/verify-token
+Cookie:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MDQ5NTg4MiwiZXhwIjoxNzQwNTA2NjgyfQ.FCv_XdXD_wi-fgfKnm9JgBraRSqWKlwpGAhorMp5eMA
+
+###
+# Route to events
+GET http://localhost:3000/api/events
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+
+###
+GEt http://localhost:3000/api/events/atelier-sculpture-bois
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+
+###
+GET http://localhost:3000/api/profiles
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+
+###
+GET http://localhost:3000/api/profiles/claude
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+
+###
+# Route to get account details
+GET http://localhost:3000/api/my-account
+Cookie:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NTU2NDY4MSwiZXhwIjoxNzQ1NTc1NDgxfQ.JlIJ_0QZKDHMnNYQ_i6B7ubxFGGpexdMPW4RoO-_OCU
+
+###
+# Route to update account details
+PATCH  http://localhost:3000/api/my-account
+Content-Type: application/json
+Cookie:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MDUyNTEzNCwiZXhwIjoxNzQwNTM1OTM0fQ.19PQmiqti2Z163sRitfQE5Iq8BmF2V97XcXJRCS-Egw
+
+{
+    "firstname": "jean-Claude",
+    "city":"LYON",
+    "description": "Peintre en herbe.",
+    "labels": [2, 6],
+    "smoker": "false",
+    "pet": "true",
+    "music": "Jazz"
+}
+
+###
+# Route to delete account details
+DELETE  http://localhost:3000/api/my-account
+Cookie:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0MDM4OTY2MiwiZXhwIjoxNzQwNDAwNDYyfQ.9BOd92rNDnhDZSTrDk8Kpt7phUuLnG-hKiFMDBmjX3g
+
+
+### 
+# Route to sign up
+POST http://localhost:3000/api/signup
+Content-Type: application/json
+
+{
+    "email": "newuser123@example.com", 
+    "password": "NewPassword2023!",
+    "repeat_password": "NewPassword2023!",  
+    "firstname": "Alice", 
+    "gender": "Femme", 
+    "gender_match": "Homme", 
+    "age": "61", 
+    "height": "165",   
+    "marital": "Célibataire", 
+    "pet": "false",   
+    "city": "TOULOUSE",
+    "description": "<script>hello</script> j'aime les chats",
+    "smoker": "false",
+    "music": "variété française",
+    "picture":"",
+    "zodiac":"poisson",
+    "labels": ["Nature", "Culturel"]
+}
+
+### 
+# Route to get up to 4 events from a user connected
+GET http://localhost:3000/api/homepage-events
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTczOTk4NTI2MywiZXhwIjoxNzM5OTk2MDYzfQ.L4La2yQW25pF5IizrdBOwi9g-sHlSIZ-j-rGkeEccU0
+
+### 
+# Route to get up to 6 profiles from a user connected
+GET http://localhost:3000/api/homepage-profiles
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTczOTk4NTI2MywiZXhwIjoxNzM5OTk2MDYzfQ.L4La2yQW25pF5IizrdBOwi9g-sHlSIZ-j-rGkeEccU0
+
+###
+GET http://localhost:3000/api/messages
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NTIzMTQ3MiwiZXhwIjoxNzQ1MjQyMjcyfQ.wwP3OiLbPb1o8WkUcmBsir9wuTbSnQlkkQoUouTBrig
+###
+POST http://localhost:3000/api/messages
+Content-Type: application/json
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+
+{
+    "receiver_id": 12,
+    "content": "Message de test"
+}

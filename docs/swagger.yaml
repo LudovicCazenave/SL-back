@@ -1,0 +1,838 @@
+openapi: 3.0.0
+info:
+  title: SeniorLove API
+  description: Documentation complète de l'API SeniorLove couvrant l'authentification, la gestion des utilisateurs, des événements et de la messagerie.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+    description: Serveur local de développement
+
+tags:
+  - name: Auth
+    description: Endpoints d'authentification (signup, signin, token, logout)
+  - name: Users
+    description: Endpoints liés aux profils utilisateurs et à la gestion du compte
+  - name: Events
+    description: Endpoints pour la gestion des événements et inscriptions
+  - name: Messages
+    description: Endpoints pour la messagerie entre utilisateurs
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    FileUpload:
+      type: string
+      format: binary
+
+    BasicError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Message d'erreur."
+
+    # ----- Auth Schemas -----
+    UserSignup:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "johndoe@example.com"
+        password:
+          type: string
+          example: "Password123"
+          description: "Doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et ne pas contenir d'espaces."
+        firstname:
+          type: string
+          example: "John"
+        gender:
+          type: string
+          example: "Homme"
+        age:
+          type: integer
+          example: 62
+        height:
+          type: number
+          example: 175
+        marital:
+          type: string
+          example: "Célibataire"
+        pet:
+          type: boolean
+          example: true
+        city:
+          type: string
+          example: "PARIS"
+        gender_match:
+          type: string
+          example: "Femme"
+        description:
+          type: string
+          example: "Passionné de jardinage et de cuisine."
+        smoker:
+          type: string
+          example: "no"
+        music:
+          type: string
+          example: "Jazz"
+        zodiac:
+          type: string
+          example: "Gémeaux"
+        labels:
+          type: array
+          items:
+            type: string
+          example: ["sportif", "voyageur"]
+        picture:
+          $ref: "#/components/schemas/FileUpload"
+      required:
+        - email
+        - password
+        - firstname
+        - gender
+        - age
+        - height
+        - marital
+        - pet
+        - city
+        - gender_match
+
+    AuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Utilisateur créé avec succès."
+        logged:
+          type: boolean
+          example: true
+        pseudo:
+          type: string
+          example: "John"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    SignInResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Connexion réussie."
+        logged:
+          type: boolean
+          example: true
+        pseudo:
+          type: string
+          example: "John"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    # ----- User Schemas -----
+    UserPublic:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        slug:
+          type: string
+          example: "jean"
+        gender:
+          type: string
+          example: "Homme"
+        firstname:
+          type: string
+          example: "Jean"
+        description:
+          type: string
+          example: "Passionné de jardinage et de cuisine."
+        age:
+          type: integer
+          example: 62
+        height:
+          type: number
+          example: 175
+        smoker:
+          type: boolean
+          example: false
+        marital:
+          type: string
+          example: "Célibataire"
+        pet:
+          type: boolean
+          example: true
+        city:
+          type: string
+          example: "PARIS"
+        music:
+          type: string
+          example: "Jazz"
+        picture:
+          type: string
+          example: "http://localhost:3000/public/uploads/image.jpg"
+        zodiac:
+          type: string
+          example: "Gémeaux"
+        gender_match:
+          type: string
+          example: "Femme"
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/Label"
+    UserDetail:
+      allOf:
+        - $ref: "#/components/schemas/UserPublic"
+        - type: object
+          properties:
+            sentMessages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Message"
+            receivedMessages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Message"
+            pastEvents:
+              type: array
+              items:
+                $ref: "#/components/schemas/Event"
+            futureEvent:
+              $ref: "#/components/schemas/Event"
+    UserAccount:
+      allOf:
+        - $ref: "#/components/schemas/UserPublic"
+        - type: object
+          properties:
+            sentMessages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Message"
+            receivedMessages:
+              type: array
+              items:
+                $ref: "#/components/schemas/Message"
+            pastEvents:
+              type: array
+              items:
+                $ref: "#/components/schemas/Event"
+            futureEvents:
+              type: array
+              items:
+                $ref: "#/components/schemas/Event"
+            role:
+              $ref: "#/components/schemas/Role"
+
+    UserUpdate:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: "NouveauNom"
+        email:
+          type: string
+          example: "nouveau@example.com"
+        picture:
+          $ref: "#/components/schemas/FileUpload"
+        labels:
+          type: array
+          items:
+            type: string
+      description: "Données facultatives pour la mise à jour du compte utilisateur"
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: "User"
+
+    Label:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Nature"
+
+    # ----- Event Schemas -----
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        slug:
+          type: string
+          example: "balade-nature-en-foret"
+        title:
+          type: string
+          example: "Balade Nature en Forêt"
+        description:
+          type: string
+          example: "Une promenade guidée dans la forêt pour découvrir la faune et la flore locales."
+        date:
+          type: string
+          format: date
+          example: "2025-05-15"
+        time:
+          type: string
+          example: "10:00"
+        city:
+          type: string
+          example: "PARIS"
+        street:
+          type: string
+          example: "Rue des Écoles"
+        street_number:
+          type: integer
+          example: 34
+        zip_code:
+          type: integer
+          example: 75005
+        label_id:
+          type: integer
+          example: 1
+        picture:
+          type: string
+          example: "image1.jpg"
+
+    # ----- Message Schemas -----
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: "Bonjour, ceci est un message."
+        sender_id:
+          type: integer
+          example: 1
+        receiver_id:
+          type: integer
+          example: 2
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-04-30T19:14:00Z"
+
+paths:
+  # -------------------------------
+  # Endpoints Auth (authController)
+  # -------------------------------
+  /api/signup:
+    post:
+      tags:
+        - Auth
+      summary: Inscription d'un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserSignup"
+      responses:
+        "201":
+          description: Utilisateur créé avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Champs manquants ou validation échouée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/signin:
+    post:
+      tags:
+        - Auth
+      summary: Connexion d'un utilisateur existant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "johndoe@example.com"
+                password:
+                  type: string
+                  example: "Password123"
+      responses:
+        "200":
+          description: Connexion réussie et token JWT retourné.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignInResponse"
+        "400":
+          description: Email ou mot de passe manquant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "401":
+          description: Mot de passe incorrect.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/verify-token:
+    get:
+      tags:
+        - Auth
+      summary: Vérifier la validité d'un token JWT
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Token valide, retourne l'ID et le prénom de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    example: 1
+                  firstname:
+                    type: string
+                    example: "John"
+        "401":
+          description: Token invalide ou expiré.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/logout:
+    post:
+      tags:
+        - Auth
+      summary: Déconnexion de l'utilisateur (effacement du cookie JWT)
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Déconnexion réussie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Succès"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  # -------------------------------
+  # Endpoints Users (userController)
+  # -------------------------------
+  /api/profiles:
+    get:
+      tags:
+        - Users
+      summary: Récupérer la liste de tous les profils utilisateurs
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Liste des profils récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPublic"
+        "500":
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/profiles/{slug}:
+    get:
+      tags:
+        - Users
+      summary: Récupérer le profil d'un utilisateur par son slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Le slug du profil utilisateur.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profil récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+
+  /api/my-account:
+    get:
+      tags:
+        - Users
+      summary: Récupérer les détails du compte utilisateur connecté
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Détails du compte récupérés avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAccount"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+    patch:
+      tags:
+        - Users
+      summary: Mettre à jour les informations du compte utilisateur
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Les informations du compte ont été mises à jour avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Les informations de l'utilisateur ont été mises à jour avec succès"
+                  user:
+                    $ref: "#/components/schemas/UserPublic"
+        "400":
+          description: Erreur de validation ou requête invalide.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+    delete:
+      tags:
+        - Users
+      summary: Supprimer le compte utilisateur connecté
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Compte supprimé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Utilisateur supprimé avec succès"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+
+  /api/homepage-profiles:
+    get:
+      tags:
+        - Users
+      summary: Récupérer les profils connectés basés sur les préférences de l'utilisateur
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Liste des profils récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPublic"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+
+  # -------------------------------
+  # Endpoints Events (eventController)
+  # -------------------------------
+  /api/homepage-events:
+    get:
+      tags:
+        - Events
+      summary: Récupérer les événements pour la homepage connectée
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Liste d'événements récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/filter-event:
+    get:
+      tags:
+        - Events
+      summary: Filtrer les événements (parmi les villes PARIS, LYON, TOULOUSE, etc.)
+      responses:
+        "200":
+          description: Liste filtrée d'événements.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "400":
+          description: Requête invalide.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/events:
+    get:
+      tags:
+        - Events
+      summary: Récupérer tous les événements
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Liste de tous les événements récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/events/{slug}:
+    get:
+      tags:
+        - Events
+      summary: Récupérer un événement par son slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Le slug de l'événement.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Détails de l'événement récupérés avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "404":
+          description: Événement non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  /api/events/{slug}/register:
+    post:
+      tags:
+        - Events
+      summary: Inscription à un événement via son slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Le slug de l'événement.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Inscription réussie à l'événement.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Inscription réussie"
+        "400":
+          description: Requête invalide ou déjà inscrit.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+
+  # -------------------------------
+  # Endpoints Messages (messageController)
+  # -------------------------------
+  /api/messages:
+    get:
+      tags:
+        - Messages
+      summary: Récupérer tous les messages de l'utilisateur connecté
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Liste de tous les messages récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "401":
+          description: Non autorisé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicError"
+        "500":
+          description: Erreur serveur.
+      post:
+        tags:
+          - Messages
+        summary: Créer un nouveau message
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - receiver_id
+                  - content
+                properties:
+                  receiver_id:
+                    type: integer
+                    example: 3
+                  content:
+                    type: string
+                    example: "Salut, comment vas-tu ?"
+        responses:
+          "201":
+            description: Message créé avec succès.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Message"
+          "400":
+            description: Requête invalide.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/BasicError"
+          "401":
+            description: Non autorisé.
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/BasicError"
