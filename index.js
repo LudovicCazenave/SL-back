@@ -11,6 +11,9 @@ import helmet from "helmet"; // Import Helmet to secure Express apps by setting 
 
 import { bodySanitizer } from "./src/middlewares/sanitizeMiddleware.js"; // Import body sanitizer middleware
 
+import fs from 'fs';
+import path from 'path';
+
 const app = express(); // Initialize the Express application
 
 // Load the Swagger API documentation from the YAML file
@@ -49,6 +52,13 @@ app.use(bodySanitizer);
 
 // Use the router for all API endpoints defined in your routes
 app.use(router);
+
+const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('✅ Folder "public/uploads" created');
+}
 
 // Define the port from the environment or default to 3000 if not provided
 const PORT = process.env.PORT || 3000;
