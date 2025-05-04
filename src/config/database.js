@@ -9,12 +9,12 @@ export const sequelize = new Sequelize(
       ssl: {
         require: true,
         rejectUnauthorized: false,
-      },
+      }
+    },
     define: {
       createdAt: "created_at",
       updatedAt: "updated_at",
     }
-  }
   }
 );
 
