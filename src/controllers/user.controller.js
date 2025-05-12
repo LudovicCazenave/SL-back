@@ -48,7 +48,7 @@ export const userController = {
 
     // Retrieve past events (events with a date in the past) for the user.
     // Limit the results to 2 and order by date in descending order.
-    const pastEvents = await Event.findAll({
+    const pastEvents = await user.getEvents({
       where: {
         date: { [Op.lt]: new Date() }
       },
@@ -62,7 +62,7 @@ export const userController = {
     });
 
     // Retrieve the next upcoming event (first event in the future) for the user.
-    const futureEvent = await Event.findOne({
+    const futureEvent = await user.getEvents({
       where: {
         date: { [Op.gt]: new Date() }
       },
@@ -100,9 +100,8 @@ export const userController = {
     const currentDate = new Date();
 
     // Retrieve the user's past events by filtering the user's events where the date has passed.
-    const pastEvents = await Event.findAll({
+    const pastEvents = await user.getEvents({
       where: {
-        id: user.events.map(event => event.id),
         date: { [Op.lt]: currentDate }
       },
       include: [
@@ -112,9 +111,8 @@ export const userController = {
     });
 
     // Retrieve the user's upcoming events by filtering the user's events where the date is in the future.
-    const futureEvents = await Event.findAll({
+    const futureEvents = await user.getEvents({
       where: {
-        id: user.events.map(event => event.id),
         date: { [Op.gt]: currentDate }
       },
       include: [
