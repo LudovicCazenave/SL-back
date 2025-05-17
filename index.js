@@ -8,7 +8,7 @@ import cors from "cors"; // Import CORS middleware to handle cross-origin reques
 import cookieParser from "cookie-parser";
 
 import helmet from "helmet"; // Import Helmet to secure Express apps by setting various HTTP headers
-
+import rateLimit from "express-rate-limit"
 import { bodySanitizer } from "./src/middlewares/sanitizeMiddleware.js"; // Import body sanitizer middleware
 
 import fs from 'fs';
@@ -35,6 +35,13 @@ app.use(cors({
   allowedHeaders: "Content-Type, Authorization" // Allowed HTTP headers for CORS
 }));
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // Define the time window in milliseconds (15 minutes)
+  limit: 100, // Set the maximum number of requests allowed within the window
+  message: "Trop de requtes, veuillez ressayer plus tard !"
+});
+ // Apply the rate limiter middleware to the application 
+app.use(limiter);
 // Use cookieParser to parse cookies into req.cookies
 app.use(cookieParser());
 
