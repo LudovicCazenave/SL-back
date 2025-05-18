@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-
+import * as argon2 from "argon2";
 import { Role, User, Label } from "../models/associations.js";
 
 const jwtSecret = process.env.JWT_SECRET; // Retrieve the secret key from .env
