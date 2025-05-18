@@ -29,7 +29,7 @@ app.use(helmet({
 
 // Enable CORS to specify which origins can access the API
 app.use(cors({
-  origin: "http://localhost:3000", // Allow requests only from this origin (for local development)
+  origin: "https://seniorlove-psi.vercel.app", // Allow requests only from this origin (for local development)
   credentials: true,                // Enable cookies and credentials in cross-origin requests
   methods: "GET, PUT, POST, PATCH, DELETE", // Allowed HTTP methods for CORS
   allowedHeaders: "Content-Type, Authorization" // Allowed HTTP headers for CORS

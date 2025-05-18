@@ -1,122 +1,10 @@
 import jwt from 'jsonwebtoken';
 
 import { Role, User, Label } from "../models/associations.js";
-import slugify from 'slugify';
-
-// Function to generate slug
-const generateSlug = (name) => {
-  return slugify(name, {
-    lower: true, // Convert to lowercase
-    remove: /[^a-zA-Z0-9 -]/g, // Remove special characters except spaces and hyphens
-    strict: true // Remove any remaining special characters
-  });
-};
 
 const jwtSecret = process.env.JWT_SECRET; // Retrieve the secret key from .env
 
 export const authController = {
-
-  // Handle user sign-up
-  async signUp(req, res) {
-    const { email, password, firstname, gender, age, height, marital, pet, city, gender_match, description, smoker, music, zodiac, labels } = req.body;
-
-    // Validate required fields
-    if (!email || !password || !firstname || !gender || !age || !height || !marital || !pet || !city || !gender_match) {
-      return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis.' });
-    }
-
-    // Configure password validator
-    const passwordSchema = new passwordValidator();
-    passwordSchema
-      .is().min(8)
-      .is().max(100)
-      .has().uppercase()
-      .has().lowercase()
-      .has().digits(1)
-      .has().not().spaces();
-
-    // Validate password
-    if (!passwordSchema.validate(password)) {
-      return res.status(400).json({
-        error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre, et ne doit pas contenir d’espaces.',
-      });
-    }
-
-    // Check if email is already in use
-    const existingUser = await User.findOne({
-      where: { email },
-      include: [{
-        model: Role,
-        as: "role"
-      }]
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'Un utilisateur avec cet email existe déjà.' });
-    }
-
-    // Hash the password
-    const hashedPassword = await argon2.hash(password);
-    
-    
-    let imagePath = null;
-    if (req.file) {
-      imagePath = req.file.path; 
-    }
-
-
-    // Create the user
-    const newUser = await User.create({
-      email,
-      password: hashedPassword,
-      firstname,
-      gender,
-      age,
-      height,
-      marital,
-      pet,
-      city,
-      gender_match,
-      description,
-      smoker,
-      music,
-      picture: imagePath,
-      zodiac,
-      slug: generateSlug(firstname) // Generate slug based on firstname
-    });
-
-    // Check if labels are provided and if the labels array is not empty
-    if (labels && labels.length > 0) {
-      // Find all labels in the database that match the provided label names
-      const userLabels = await Label.findAll({
-        where: {
-          name: labels // Filter labels by the names provided in the request
-        }
-      });
-
-      // Associate the found labels with the newly created user
-      // This uses the `setLabels` method provided by Sequelize for many-to-many relationships
-      await newUser.setLabels(userLabels);
-    }
-
-    // Save user to database
-    await newUser.save();
-
-    // Generate JWT
-    const jwtContent = { userId: newUser.id };// Create JWT payload with user ID
-    const jwtOptions = { algorithm: 'HS256', expiresIn: '3h' };// Define JWT options, setting the algorithm and expiration time
-    const token = jwt.sign(jwtContent, jwtSecret, jwtOptions);// Sign the JWT using the secret key and options
-
-
-    // Return the token and user info
-    return res.status(201).json({ 
-      message: 'Utilisateur créé avec succès.', 
-      logged: true, 
-      pseudo: newUser.firstname,
-      token 
-    });
-  },
-
 
   // Handle user sign-in
   async signIn(req, res) {
@@ -150,8 +38,8 @@ export const authController = {
     const options = {
       maxAge: 1000 * 60 * 60 * 3, // expire after 3 hours
       httpOnly: true, // Cookie will not be exposed to client side code
-      //sameSite: "none", // If client and server origins are different
-      //secure: true // use with HTTPS only
+      sameSite: "none", // If client and server origins are different
+      secure: true // use with HTTPS only
     };
 
     // Generate JWT
