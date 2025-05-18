@@ -1,4 +1,6 @@
 import { User, Event, Label, Message, Role } from "../models/associations.js";
+import passwordValidator from "password-validator";
+import * as argon2 from "argon2";
 import { Op } from "sequelize";
 import { userUpdateSchema } from "../schema/user.schema.js";
 import { deleteFileIfExists } from "../utils/file.utils.js";
@@ -16,6 +18,100 @@ const generateSlug = (name) => {
 };   
 
 export const userController = {
+
+  // Handle user sign-up
+  async signUp(req, res) {
+    const { email, password, firstname, gender, age, height, marital, pet, city, gender_match, description, smoker, music, zodiac, labels } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !firstname || !gender || !age || !height || !marital || !pet || !city || !gender_match) {
+      return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis.' });
+    }
+
+    // Configure password validator
+    const passwordSchema = new passwordValidator();
+    passwordSchema
+      .is().min(8)
+      .is().max(100)
+      .has().uppercase()
+      .has().lowercase()
+      .has().digits(1)
+      .has().not().spaces();
+
+    // Validate password
+    if (!passwordSchema.validate(password)) {
+      return res.status(400).json({
+        error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre, et ne doit pas contenir d’espaces.',
+      });
+    }
+
+    // Check if email is already in use
+    const existingUser = await User.findOne({
+      where: { email },
+      include: [{
+        model: Role,
+        as: "role"
+      }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Un utilisateur avec cet email existe déjà.' });
+    }
+
+    // Hash the password
+    const hashedPassword = await argon2.hash(password);
+    
+    
+    let imagePath = null;
+    if (req.file) {
+      imagePath = req.file.path; 
+    }
+
+
+    // Create the user
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      firstname,
+      gender,
+      age,
+      height,
+      marital,
+      pet,
+      city,
+      gender_match,
+      description,
+      smoker,
+      music,
+      picture: imagePath,
+      zodiac,
+      slug: generateSlug(firstname) // Generate slug based on firstname
+    });
+
+    // Check if labels are provided and if the labels array is not empty
+    if (labels && labels.length > 0) {
+      // Find all labels in the database that match the provided label names
+      const userLabels = await Label.findAll({
+        where: {
+          name: labels // Filter labels by the names provided in the request
+        }
+      });
+
+      // Associate the found labels with the newly created user
+      // This uses the `setLabels` method provided by Sequelize for many-to-many relationships
+      await newUser.setLabels(userLabels);
+    }
+
+    // Save user to database
+    await newUser.save();
+
+    // Return the user info
+    return res.status(201).json({ 
+      message: 'Utilisateur créé avec succès.', 
+      logged: true, 
+      pseudo: newUser.firstname,
+    });
+  },
   
   // Retrieve all user profiles excluding sensitive fields and including their associated labels and events.
   async getAllProfiles(req, res) {
@@ -23,7 +119,10 @@ export const userController = {
       // Exclude sensitive fields like password, email, role_id, created_at, and updated_at from the response.
       attributes: { exclude: ['password', 'email', 'role_id', 'created_at', 'updated_at'] },
       // Include associations with labels and events.
-      include: ['labels', 'events'],
+      include: [
+        {model: Label, as: 'labels', attributes:["name"]},
+        {model: Event, as: 'events', attributes: {exclude:['created_at', 'updated_at']}}
+        ],
     });
 
     // Return the fetched user profiles as a JSON response with a 200 status code.
@@ -38,7 +137,12 @@ export const userController = {
     // Include associations for sent messages, received messages, and labels.
     const user = await User.findOne({
       where: { slug: slug },
-      include: ['sentMessages', 'receivedMessages', 'labels']
+      attributes: { exclude: ['password', 'email', 'role_id', 'created_at', 'updated_at'] },
+      include: [
+        'sentMessages',
+        'receivedMessages',
+        {model: Label, as:'labels', attributes:['name'] },
+      ]
     });
 
     // If the user is not found, return a 404 response with an appropriate message.
@@ -47,18 +151,15 @@ export const userController = {
     };
 
     // Retrieve past events (events with a date in the past) for the user.
-    // Limit the results to 2 and order by date in descending order.
     const pastEvents = await user.getEvents({
       where: {
         date: { [Op.lt]: new Date() }
       },
-      limit: 2,
+      attributes: {exclude:['created_at', 'updated_at']},
       order: [['date', 'DESC']],
       include: [
-        { model: Label, as: 'label' }
+        { model: Label, as: 'label', attribute:['name'] }
       ],
-      // Select only essential event attributes.
-      attributes: ['id', 'title', 'city', 'description']
     });
 
     // Retrieve the next upcoming event (first event in the future) for the user.
@@ -66,11 +167,11 @@ export const userController = {
       where: {
         date: { [Op.gt]: new Date() }
       },
+      attributes: {exclude:['created_at', 'updated_at']},
       order: [['date', 'ASC']],
       include: [
-        { model: Label, as: 'label' }
+        { model: Label, as: 'label', attribute:['name'] }
       ],
-      attributes: ['id', 'title', 'city', 'description']
     });
 
     // Append past and future event information to the user's data values.
@@ -87,8 +188,12 @@ export const userController = {
     const userId = req.user.userId; 
     const user = await User.findOne({
       where: { id: userId },
+      attributes: { exclude: ['password', 'email', 'role_id', 'created_at', 'updated_at'] },
       include: [
-        'role', 'sentMessages', 'receivedMessages', 'labels', 'events'
+        {model: Role, as:'role',attributes:{ exclude: ['name','created_at', 'updated_at']}},
+        'sentMessages',
+        'receivedMessages', 
+        {model: Label, as:'labels', attributes:['name']},
       ]
     });
 
@@ -104,8 +209,9 @@ export const userController = {
       where: {
         date: { [Op.lt]: currentDate }
       },
+      attributes: {exclude:['created_at', 'updated_at']},
       include: [
-        { model: Label, as: 'label' }
+        { model: Label, as: 'label', attribute:['name'] }
       ],
       order: [['date', 'DESC']]
     });
@@ -115,8 +221,9 @@ export const userController = {
       where: {
         date: { [Op.gt]: currentDate }
       },
+      attributes: {exclude:['created_at', 'updated_at']},
       include: [
-        { model: Label, as: 'label' }
+        { model: Label, as: 'label', attribute:['name'] }
       ],
       order: [['date', 'ASC']],
     });
@@ -249,7 +356,7 @@ export const userController = {
       limit: 6, // Limit to 6 profiles.
       order: [['created_at', 'DESC']], // Order by most recent creation.
       // Exclude sensitive fields (password, email) from the response.
-      attributes: { exclude: ['password', 'email'] }
+      attributes: { exclude: ['password', 'email', 'created_at', 'updated_at'] }
     });
 
     // Return the matching profiles as JSON with a 200 status code.

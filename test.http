@@ -33,7 +33,7 @@ Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE
 
 ###
 GET http://localhost:3000/api/profiles
-Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NDY1NTE5OSwiZXhwIjoxNzQ0NjY1OTk5fQ.PKgytBmbqIYgUMmdCyJ7pFeOiv1gb8ngOLicRjNDP_I
+Cookie: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc0NzU3ODQ2NSwiZXhwIjoxNzQ3NTg5MjY1fQ.sCX-6d2Oyq0xCqQ4Tg7M2AtfO_N1TZmuZ9grjsL9-4g
 
 ###
 GET http://localhost:3000/api/profiles/claude

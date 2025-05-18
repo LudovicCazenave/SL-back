@@ -31,11 +31,6 @@ router.route("/api/homepage-profiles")
 // Authentication Routes
 // ====================================
 
-// POST /api/signup
-// Handles user sign up. Uses multer middleware to process a single file upload (i.e., "picture")
-// before invoking the signUp controller wrapped in the errorHandler.
-router.route("/api/signup")
-  .post(upload.single("picture"), errorHandler(authController.signUp));
 
 // POST /api/signin
 // Handles user sign in by processing the request in the signIn controller.
@@ -79,6 +74,12 @@ router.route("/api/events/:slug/register")
 // ====================================
 // Profile Routes
 // ====================================
+
+// POST /api/signup
+// Handles user sign up. Uses multer middleware to process a single file upload (i.e., "picture")
+// before invoking the signUp controller wrapped in the errorHandler.
+router.route("/api/signup")
+  .post(upload.single("picture"), errorHandler(userController.signUp));
 
 // GET /api/profiles
 // Retrieves all user profiles excluding sensitive fields, accessible to authenticated users.

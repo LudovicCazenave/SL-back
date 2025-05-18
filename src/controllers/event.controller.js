@@ -7,7 +7,11 @@ export const eventController = {
   async getAllEvents(req, res) {
     // Retrieve all events from the database including associations identified by 'label' and 'users'
     const events = await Event.findAll({
-      include: ['label', 'users'],
+      attributes:{exclude:['created_at', 'updated_at']},
+      include: [
+        {model: Label, as:'label', attributes:["name"]},
+        {model: User, as:'users', atributes:{exclude:['password', 'email', 'role_id', 'created_at', 'updated_at']}}
+      ],
     });
     // Respond with the list of events in JSON format
     res.json(events);
@@ -19,7 +23,10 @@ export const eventController = {
     // Find the event in the database matching the given slug, including label and users associations
     const event = await Event.findOne({
       where: { slug: slug },
-      include: ['label', 'users'],
+      include: [
+        {model: Label, as:'label', attributes:["name"]},
+        {model: User, as:'users', atributes:{exclude:['password', 'email', 'role_id', 'created_at', 'updated_at']}}
+      ],
     });
 
     // If no event is found, send a 404 error response
@@ -41,7 +48,7 @@ export const eventController = {
       return await Event.findOne({
         where: { city },
         order: [['created_at', 'DESC']],
-        include: { model: Label, as: 'label' },  // Include the associated label for the event
+        include: { model: Label, as: 'label', attributes:['name'] },  // Include the associated label for the event
       });
     }));
 
@@ -72,11 +79,11 @@ export const eventController = {
           [Op.gte]: new Date(), // Only include events that occur on or after today
         },
       },
+      attributes:{exclude:['created_at', 'updated_at']},
       limit: 4,                  // Limit the number of events returned
       order: [['date', 'ASC']],  // Order events by date in ascending order (soonest events first)
       include: [{
-        model: Label,
-        as: 'label',           // Include the event label (category information)
+        model: Label, as: 'label', attributes:['name']          // Include the event label (category information)
       }],
     });
 
