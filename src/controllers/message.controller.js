@@ -69,7 +69,6 @@ export const messageController = {
         },
       ],
     });
-
     // Respond with the newly created message as JSON and a 201 status code.
     res.status(201).json(createdMessage);
   },
