@@ -437,7 +437,7 @@ paths:
   # -------------------------------
   # Endpoints Users (userController)
   # -------------------------------
-   /api/signup:
+  /api/signup:
     post:
       tags:
         - Auth
