@@ -9,7 +9,7 @@ servers:
 
 tags:
   - name: Auth
-    description: Endpoints d'authentification (signup, signin, token, logout)
+    description: Endpoints d'authentification (signin, token, logout)
   - name: Users
     description: Endpoints liés aux profils utilisateurs et à la gestion du compte
   - name: Events
