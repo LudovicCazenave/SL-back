@@ -23,6 +23,7 @@ export const eventController = {
     // Find the event in the database matching the given slug, including label and users associations
     const event = await Event.findOne({
       where: { slug: slug },
+      attributes:{exclude:['created_at', 'updated_at']},
       include: [
         {model: Label, as:'label', attributes:["name"]},
         {model: User, as:'users', atributes:{exclude:['password', 'email', 'role_id', 'created_at', 'updated_at']}}
