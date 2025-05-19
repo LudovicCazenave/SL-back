@@ -440,7 +440,7 @@ paths:
   /api/signup:
     post:
       tags:
-        - Auth
+        - Users
       summary: Inscription d'un nouvel utilisateur
       requestBody:
         required: true
