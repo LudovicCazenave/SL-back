@@ -4,7 +4,7 @@ info:
   description: Documentation complète de l'API SeniorLove couvrant l'authentification, la gestion des utilisateurs, des événements et de la messagerie.
   version: "1.0.0"
 servers:
-  - url: http://localhost:3000
+  - url: https://seniorlove.onrender.com/
     description: Serveur local de développement
 
 tags:
